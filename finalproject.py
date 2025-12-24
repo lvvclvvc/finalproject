@@ -3,9 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_bvp
 from matplotlib.widgets import Slider
 
-# ============================================================
 # 1. 物理引擎：數值求解 Blasius 方程式 (無因次解)
-# ============================================================
 def blasius_ode(eta, F):
     return np.vstack((F[1], F[2], -0.5 * F[0] * F[2]))
 
@@ -20,9 +18,7 @@ sol = solve_bvp(blasius_ode, bc, eta_mesh, F_guess)
 eta_vals = sol.x
 f_prime_vals = sol.y[1]
 
-# ============================================================
 # 2. 介面初始化 (設定固定座標軸)
-# ============================================================
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
 plt.subplots_adjust(bottom=0.3, top=0.85, wspace=0.3)
 
@@ -32,32 +28,25 @@ Y_LIMIT = 0.08
 # 防止拉桿失效的全域變數清單
 sliders = []
 
-# ============================================================
 # 3. 核心更新函數 (圖片動，座標軸不動)
-# ============================================================
 def update(val):
     U = s_U.val
     nu = s_nu.val
     L = 1.0
-    x_pos = 0.5  # 固定觀察 x = 0.5m 處的速度剖面
+    x_pos = 0.5 
     
-    # --- 左圖：速度剖面 (Velocity Profile) ---
     ax1.clear()
     ax1.set_facecolor('#fdfdfd')
     
     # 物理高度 y = eta * sqrt(nu * x / U)
     y_plot = eta_vals * np.sqrt(nu * x_pos / U)
     u_ratio = f_prime_vals # u/U
-    
-    # 延伸數據到視窗頂部 (解決線條斷掉問題)
-    # 如果 y_plot 的最後一點沒到 Y_LIMIT，就補齊它
     y_ext = np.append(y_plot, Y_LIMIT)
     u_ext = np.append(u_ratio, 1.0)
     
     # 繪製主曲線
     ax1.plot(u_ext, y_ext, 'r-', lw=2.5)
     
-    # 稀疏箭頭 (固定間隔)
     skip = 30
     ax1.quiver(np.zeros_like(y_plot[::skip]), y_plot[::skip], 
                u_ratio[::skip], np.zeros_like(y_plot[::skip]), 
@@ -72,7 +61,7 @@ def update(val):
     ax1.set_xlabel("u / U")
     ax1.set_ylabel("Height y (m)")
     ax1.set_xlim(0, 1.1)
-    ax1.set_ylim(0, Y_LIMIT) # 強制固定 Y 軸
+    ax1.set_ylim(0, Y_LIMIT) 
     ax1.grid(True, linestyle=':', alpha=0.6)
 
     # --- 右圖：邊界層成長 (Boundary Layer Growth) ---
@@ -93,9 +82,7 @@ def update(val):
     
     fig.canvas.draw_idle()
 
-# ============================================================
 # 4. 配置互動拉桿
-# ============================================================
 ax_U = plt.axes([0.2, 0.15, 0.6, 0.03], facecolor='#e1e1e1')
 s_U = Slider(ax_U, 'Velocity U ', 0.1, 10.0, valinit=1.0)
 sliders.append(s_U)
@@ -107,7 +94,6 @@ sliders.append(s_nu)
 s_U.on_changed(update)
 s_nu.on_changed(update)
 
-# 執行初始渲染
 update(None)
 
 plt.show()
